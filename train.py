@@ -11,11 +11,10 @@ import numpy as np
 
 from DQN_modified import DeepQNetwork
 from sklearn import preprocessing
-
 # path setting
 TRAIN_TRACES = './train_sim_traces/'   #train trace path setting,
 video_size_file = './video_size_'      #video trace path setting,
-LogFile_Path = "/Users/joel/Desktop/LiveStreamingDemo/Log/"                #log file trace path setting,
+LogFile_Path = './Log/'                #log file trace path setting,
 # Debug Mode: if True, You can see the debug info in the logfile
 #             if False, no log ,but the training speed is high
 DEBUG = False
@@ -30,7 +29,7 @@ BIT_RATE      = [500,800 ] # kpbs
 TARGET_BUFFER = [2,3]   # seconds
 
 MAX_EPISODES = 100
-RL = DeepQNetwork(len(BIT_RATE), 10,
+RL = DeepQNetwork(len(BIT_RATE)*len(TARGET_BUFFER), 10,
                   learning_rate=0.01,
                   reward_decay=0.9,
                   e_greedy=0.9,
@@ -105,13 +104,16 @@ for i in range(MAX_EPISODES):
 
             if cnt > 1:
                 RL.store_transition(observation, action_, reward, observation_)
-            if i>5:
+            if RL.memory_full:
                 RL.learn()
-            #target_buffer
+          
 
 
             action_ = RL.choose_action(observation_)
-            bit_rate = action_
+
+            bit_rate = int(action_ / len(BIT_RATE))
+            target_buffer = int(action_ % len(BIT_RATE))
+           
             observation = observation_
 
 
