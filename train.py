@@ -8,6 +8,8 @@ import LiveStreamingEnv.load_trace as load_trace
 import matplotlib.pyplot as plt
 import time
 import numpy as np
+import random
+
 
 from DQN_modified import DeepQNetwork
 from sklearn import preprocessing
@@ -51,8 +53,10 @@ for i in range(MAX_EPISODES):
     CUSHION  = 2
     last_bit_rate = 0
     reward_all = 0
-    bit_rate = 0
-    target_buffer = 0
+    
+    bit_rate = round(random.random())
+    target_buffer = round(random.random())
+
     #init the environment
     #setting one:
     #     1,all_cooked_time : timestamp
