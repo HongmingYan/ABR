@@ -15,11 +15,11 @@ from sklearn import preprocessing
 # path setting
 TRAIN_TRACES = './train_sim_traces/'   #train trace path setting,
 video_size_file = './video_size_'      #video trace path setting,
-LogFile_Path = "/Users/joel/Desktop/LiveStreamingDemo/Log/"                #log file trace path setting,
+LogFile_Path = "./Log/"                #log file trace path setting,
 # Debug Mode: if True, You can see the debug info in the logfile
 #             if False, no log ,but the training speed is high
 DEBUG = False
-DRAW = True
+DRAW = False
 # load the trace
 all_cooked_time, all_cooked_bw, all_cooked_rtt,_ = load_trace.load_trace(TRAIN_TRACES)
 #random_seed 
@@ -86,9 +86,10 @@ if DRAW:
     plt.xlabel("time")
     plt.axis('off')
 
+end_of_video = False
 while True:
     # input the train steps
-    if cnt >2000:
+    if end_of_video:
         plt.ioff()
         break
     #actions bit_rate  target_buffer

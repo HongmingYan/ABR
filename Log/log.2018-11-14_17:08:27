@@ -1,0 +1,31 @@
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame450 357 550 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame2182 2135 2282 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame2332 2284 2432 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame2823 2739 2923 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame3203 3140 3303 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame3652 3601 3752 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame4179 4109 4279 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame4354 4302 4454 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame4879 4800 4979 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame5215 5113 5315 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame5525 5420 5625 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame5725 5625 5825 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame6026 5909 6126 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame6267 6138 6367 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame6571 6367 6671 100
+ADD_Frame100
+skip events: skip_download_frame, play_frame, new_download_frame, ADD_frame6836 6677 6936 100
