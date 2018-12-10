@@ -11,7 +11,7 @@ import numpy as np
 import random
 
 
-from DQN_modified import DeepQNetwork
+from PR_DQN import DQNPrioritizedReplay
 from sklearn import preprocessing
 # path setting
 TRAIN_TRACES = './train_sim_traces/'   #train trace path setting,
@@ -31,7 +31,7 @@ BIT_RATE      = [500,800 ] # kpbs
 TARGET_BUFFER = [2,3]   # seconds
 
 MAX_EPISODES = 30
-RL = DeepQNetwork(len(BIT_RATE)*len(TARGET_BUFFER), 10,
+RL = DQNPrioritizedReplay(len(BIT_RATE)*len(TARGET_BUFFER), 10,
                   learning_rate=0.01,
                   reward_decay=0.9,
                   e_greedy=0.9,
