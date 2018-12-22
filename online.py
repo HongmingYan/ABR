@@ -13,19 +13,22 @@ import tensorflow as tf
 
 
 import random
-from PR_DQN import DQNPrioritizedReplay
+from Double_DQN import DoubleDQN
 # from Dueling_DQN import DuelingDQN
 from sklearn import preprocessing
 
-RL = DQNPrioritizedReplay(4, 1,
-                  learning_rate=0.005,
-                  reward_decay=0.9,
-                  e_greedy=0.9,
-                  replace_target_iter=200,
-                  memory_size=3000,
-                  # output_graph=True
-                  )
-                  
+RL = DoubleDQN(4, 
+                single_fea = 6,
+                multi_fea = 9,
+                frame_len = 10,
+                learning_rate=0.005,
+                reward_decay=0.9,
+                e_greedy=0.9,
+                replace_target_iter=200,
+                memory_size=3000,
+                # output_graph=True
+                )
+
 # path setting
 def test(user_id):
     #TRAIN_TRACES = '/home/game/test_sim_traces/'   #train trace path setting,
@@ -231,13 +234,10 @@ def test(user_id):
                 
                 else: 
                    bit_rate = 2
-                  
                 
             
             else:
-                
-                
-                
+            
                 '''
                 time
                 end_of_video
@@ -255,117 +255,22 @@ def test(user_id):
                 S_buffer_flag
                 S_cdn_flag
                 '''
-                '''
-                start = 0
-                for i in range(7500):
-                    if S_time_interval[i] != 0:
-                        start = i
-                        break
-                if start != 0:
-                    S_time_interval = S_time_interval[start:]
-                    S_send_data_size = S_send_data_size[start:]
-                    S_chunk_len = S_chunk_len[start:]
-                    S_rebuf = S_rebuf[start:]
-                    S_buffer_size = S_buffer_size[start:]
-                    S_play_time_len = S_play_time_len[start:]
-                    S_end_delay = S_end_delay[start:]
-                    S_decision_flag = S_decision_flag[start:]
-                    S_buffer_flag = S_buffer_flag[start:]
-                    S_cdn_flag = S_cdn_flag[start:]
-                    S_bitrate = S_bitrate[start:]
-                
-                id = [1]
-                now = 1
-                for i in range(1,len(S_decision_flag)):
-                    id.append(now)
-                    if S_decision_flag[i] == 1:
-                        now+=1
-                '''
-                '''
-                S_sds = S_send_data_size[:]
-                for i in range(len(S_sds)):
-                    S_sds[i] = S_sds[i] / BIT_RATE[S_bitrate[i]]
-                    
-                S_df = np.where(S_decision_flag,1,0)
-                S_bf = np.where(S_buffer_flag,1,0)
-                S_cg = np.where(S_cdn_flag,1,0)
-                
-                data = np.array([S_time_interval,S_sds,S_chunk_len,S_rebuf,S_buffer_size, S_play_time_len,S_end_delay,S_df,S_bf,S_cg]).T
-                
-                '''
-                S_df = np.where(S_decision_flag,1,0)
-                
-                if cnt == 1:
-                    for i in range(7498,-1,-1):
-                        if S_time_interval[i] == 0:
-                            frame_num = 7499 - i
-                            break
-                else:
-                    for i in range(7498,-1,-1):
-                        if S_df[i] == 1:
-                            frame_num = 7499 - i
-                            break
-                '''
-                period = [int(frame_num/i) for i in range(1,6)]
-                observation_ = np.array([])
-                for i in range(len(period)):
-                   
-                    d = data[-period[i]:]
-                    if i==0:
-                        observation_ = d.max(axis=0)
-                    else:
-                        observation_ = np.hstack((observation_, d.max(axis=0)))
-                    observation_ = np.hstack((observation_, d.min(axis=0)))
-                    observation_ = np.hstack((observation_, d.mean(axis=0)))
-                    observation_ = np.hstack((observation_, d.std(axis=0)))
-                    observation_ = np.hstack((observation_, d.var(axis=0)))
-                    observation_ = np.hstack((observation_, d.sum(axis=0)))
-                #time
-                if end_of_video:
-                    end_of_video = 1
-                else:
-                    end_of_video = 0
-                if len(cdn_has_frame[0]) > 0:
-                    cdn_has_frame = np.array(cdn_has_frame)
-                    observation_ = np.hstack((observation_, cdn_has_frame.max(axis=1)))
-                    observation_ = np.hstack((observation_, cdn_has_frame.min(axis=1)))
-                    observation_ = np.hstack((observation_, cdn_has_frame.std(axis=1)))
-                    observation_ = np.hstack((observation_, cdn_has_frame.var(axis=1)))
-                    observation_ = np.hstack((observation_, cdn_has_frame.sum(axis=1)))
-                else:
-                    observation_ = np.hstack((observation_, np.zeros(25)))
-                observation_ = np.hstack((observation_, np.array([end_of_video, cdn_newest_id - download_id])))
-                '''
-                sdf = 0
-                sbf = 0
-                scf = 0
-                if S_decision_flag[-1]:
-                    sdf = 1
-                if S_buffer_flag[-1]:
-                    sbf = 1
-                if S_cdn_flag[-1]:
-                    scf = 1
-                if end_of_video:
-                    end_of_video = 1
-                else:
-                    end_of_video = 0
-                    
-                changed_time = 0
-                last = S_bitrate[-cnt]
-                for each in S_bitrate[-cnt:]:
+                change=0
+                last = S_bitrate[0]
+                for each in S_bitrate:
                     if each != last:
-                        changed_time +=1
                         last = each
-                
+                        change+=1
+                  
                 # 前一段时间gop的平均状况，用来判断处于一个相对高中低的网络，还有网络的变化幅度，再加上前短时间的状况用来预测接下来状况
-                #recent_state = np.array([changed_time])
-                recent_state = np.array([])
-                #last_state = np.array([abs(BIT_RATE[S_bitrate[-1]] - BIT_RATE[S_bitrate[-2]]), BIT_RATE[bit_rate], TARGET_BUFFER[target_buffer], S_buffer_size[-1] - TARGET_BUFFER[target_buffer],
-                #            S_time_interval[-1],S_send_data_size[-1],S_chunk_len[-1],S_rebuf[-1],S_buffer_size[-1], S_play_time_len[-1],S_end_delay[-1], sbf,sdf,scf, end_of_video, cdn_newest_id - download_id])
-                
-                last_state = np.array([S_buffer_size[-1]])
-                observation_ = np.hstack((recent_state, last_state))
-                #observation_ = preprocessing.scale(observation_)
+ 
+                sqe_fea = 9
+                single_fea = 5
+                frame_len = 10
+                observation_ = np.array([ S_time_interval[-frame_len:]+ S_send_data_size[-frame_len:]+ S_chunk_len[-frame_len:]+ S_buffer_size[-frame_len:]+
+                                        S_rebuf[-frame_len:]+S_end_delay[-frame_len:]+ S_play_time_len[-frame_len:]+ S_buffer_flag[-frame_len:]+ S_cdn_flag[-frame_len:]+ 
+                                        [time, end_of_video, cdn_newest_id - download_id, download_id, len(cdn_has_frame[0]), change]]).flatten()
+                observation_ = preprocessing.scale(observation_)
                 if cnt > 1:
                     
                     RL.store_transition(observation, action_, reward_all, observation_)
@@ -390,6 +295,7 @@ def test(user_id):
                        bit_rate = 2
                     action_ = bit_rate
                 else:
+                
                     action_ = RL.choose_action(observation_)
                     bit_rate = action_
                 #bit_rate = int(action_ % len(BIT_RATE))

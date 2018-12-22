@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-
+import tflearn
 np.random.seed(1)
 tf.set_random_seed(1)
 
@@ -9,7 +9,9 @@ class DoubleDQN:
     def __init__(
             self,
             n_actions,
-            n_features,
+            single_fea,
+            multi_fea,
+            frame_len,
             learning_rate=0.005,
             reward_decay=0.9,
             e_greedy=0.9,
@@ -22,7 +24,10 @@ class DoubleDQN:
             sess=None,
     ):
         self.n_actions = n_actions
-        self.n_features = n_features
+        self.single_fea = single_fea
+        self.multi_fea = multi_fea
+        self.frame_len = frame_len
+        self.n_features = multi_fea*frame_len+single_fea
         self.lr = learning_rate
         self.gamma = reward_decay
         self.epsilon_max = e_greedy
@@ -36,7 +41,7 @@ class DoubleDQN:
         self.double_q = double_q    # decide to use double q or not
 
         self.learn_step_counter = 0
-        self.memory = np.zeros((self.memory_size, n_features*2+2))
+        self.memory = np.zeros((self.memory_size, self.n_features*2+2))
         self._build_net()
         t_params = tf.get_collection('target_net_params')
         e_params = tf.get_collection('eval_net_params')
@@ -53,11 +58,32 @@ class DoubleDQN:
 
     def _build_net(self):
         def build_layers(s, c_names, n_l1, w_initializer, b_initializer):
-            with tf.variable_scope('l1'):
-                w1 = tf.get_variable('w1', [self.n_features, n_l1], initializer=w_initializer, collections=c_names)
-                b1 = tf.get_variable('b1', [1, n_l1], initializer=b_initializer, collections=c_names)
-                l1 = tf.nn.relu(tf.matmul(s, w1) + b1)
+            
+            
+            with tf.variable_scope('l0'):
+                multi = tf.reshape(s[:,:self.multi_fea * self.frame_len], [-1, self.multi_fea, self.frame_len])
+                single = s[:,self.multi_fea * self.frame_len:]
+                #self.multi_fea = 9
+                tmp = tf.shape(multi)[0]
+                conv_1 = tflearn.conv_1d(tf.reshape(multi[:,0,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_2 = tflearn.conv_1d(tf.reshape(multi[:,1,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_3 = tflearn.conv_1d(tf.reshape(multi[:,2,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_4 = tflearn.conv_1d(tf.reshape(multi[:,3,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_5 = tflearn.conv_1d(tf.reshape(multi[:,4,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_6 = tflearn.conv_1d(tf.reshape(multi[:,5,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_7 = tflearn.conv_1d(tf.reshape(multi[:,6,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_8 = tflearn.conv_1d(tf.reshape(multi[:,7,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                conv_9 = tflearn.conv_1d(tf.reshape(multi[:,8,:],[tmp,-1,1]), 32, 4, activation='relu',padding='valid')
+                tmp = tf.concat([conv_1,conv_2,conv_3,conv_4,conv_5,conv_6,conv_7,conv_8,conv_9],axis=-1)
+                tmp1 = tf.reshape(tmp, [tf.shape(tmp)[0],-1])
+                merge_data = tf.concat([tmp1,single],axis=-1)
 
+            
+            with tf.variable_scope('l1'):
+                #(self.frame_len - 4 +1)*32*self.multi_fea + self.single_fea
+                w1 = tf.get_variable('w1', [ 2022 , n_l1], initializer=w_initializer, collections=c_names)
+                b1 = tf.get_variable('b1', [1, n_l1], initializer=b_initializer, collections=c_names)
+                l1 = tf.nn.relu(tf.matmul(merge_data, w1) + b1)
             with tf.variable_scope('l2'):
                 w2 = tf.get_variable('w2', [n_l1, self.n_actions], initializer=w_initializer, collections=c_names)
                 b2 = tf.get_variable('b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
